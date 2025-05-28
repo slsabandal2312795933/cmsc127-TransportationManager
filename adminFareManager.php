@@ -3,6 +3,9 @@ require_once 'DBConnector.php';
 
 $message = "";
 
+// Define allowed Passenger Types
+$passengerTypes = ['Regular', 'Elderly', 'Student', 'Disabled'];
+
 // Handle Add
 if (isset($_POST['add'])) {
     $passengerType = $_POST['PassengerType'];
@@ -65,7 +68,12 @@ $fares = $conn->query("SELECT * FROM Fare ORDER BY FareID ASC");
         <div class="card-body">
             <form method="POST" class="row g-3">
                 <div class="col-md-4">
-                    <input type="text" name="PassengerType" class="form-control" placeholder="Passenger Type" required>
+                    <select name="PassengerType" class="form-select" required>
+                        <option value="" disabled selected>Select Passenger Type</option>
+                        <?php foreach ($passengerTypes as $type): ?>
+                            <option value="<?= $type ?>"><?= $type ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
                 <div class="col-md-3">
                     <input type="number" name="FarePerKM" step="0.01" class="form-control" placeholder="Fare per KM" required>
@@ -96,10 +104,23 @@ $fares = $conn->query("SELECT * FROM Fare ORDER BY FareID ASC");
                 <?php while ($row = $fares->fetch_assoc()): ?>
                 <tr>
                     <form method="POST" class="row g-1">
-                        <td class="col-1"><?= $row['FareID'] ?><input type="hidden" name="FareID" value="<?= $row['FareID'] ?>"></td>
-                        <td class="col-3"><input type="text" name="PassengerType" value="<?= $row['PassengerType'] ?>" class="form-control"></td>
-                        <td class="col-2"><input type="number" step="0.01" name="FarePerKM" value="<?= $row['FarePerKM'] ?>" class="form-control"></td>
-                        <td class="col-2"><input type="number" step="0.01" name="MinimumFare" value="<?= $row['MinimumFare'] ?>" class="form-control"></td>
+                        <td class="col-1">
+                            <?= $row['FareID'] ?>
+                            <input type="hidden" name="FareID" value="<?= $row['FareID'] ?>">
+                        </td>
+                        <td class="col-3">
+                            <select name="PassengerType" class="form-select">
+                                <?php foreach ($passengerTypes as $type): ?>
+                                    <option value="<?= $type ?>" <?= $type === $row['PassengerType'] ? 'selected' : '' ?>><?= $type ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                        <td class="col-2">
+                            <input type="number" step="0.01" name="FarePerKM" value="<?= $row['FarePerKM'] ?>" class="form-control">
+                        </td>
+                        <td class="col-2">
+                            <input type="number" step="0.01" name="MinimumFare" value="<?= $row['MinimumFare'] ?>" class="form-control">
+                        </td>
                         <td class="col-4 text-center">
                             <button type="submit" name="edit" class="btn btn-primary btn-sm me-1">Save</button>
                             <button type="submit" name="delete" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</button>
